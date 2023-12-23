@@ -1,6 +1,6 @@
 # IPFS Storage (ipfs-storage)
 
-> A package that makes interacting with IPFS easier
+> A NodeJS package that makes interacting with IPFS easier
 
 [![npm package][npm-img]][npm-url]
 [![Build Status][build-img]][build-url]
@@ -11,10 +11,14 @@
 ## Install
 
 ```bash
-npm install ipfs-storage --save-dev
+npm install ipfs-storage
 ```
 
 ## Usage
+
+- Depends on node18+
+- Upload files to Pinata
+  - Why aren't we using web3.storage?
 
 ** 🚨 TODO 🚨 **
 
@@ -31,4 +35,5 @@ _The usage section should be minimal. Enough to demo the package, but not overlo
 [semantic-release-img]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-release-url]: https://github.com/semantic-release/semantic-release
 
-TODO: NC - Make sure this package is private
+TODO: NC - Finalise readme
+TODO: NC - Add tests

@@ -1,1 +1,2 @@
-export { packageCode } from './package-code'
+export * from './ipfs'
+export * from './cache'

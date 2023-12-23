@@ -1,28 +1,30 @@
-name: Pull Request
-
+name: Release
 on:
-  pull_request:
-    branches: [ 'main' ]
+  push:
+    branches:
+      # - main
+      - ignore # TODO: NC - Remove this line and uncomment the line above when ready to release
+
+permissions:
+  contents: write
+  packages: write
+  issues: read
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
-
-    name: Build and test with Node ${{ matrix.node-version }}
+    name: Release package to NPM
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js latest LTS version
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: lts/*
           # == Cache frequently built and/or with large dependencies ==
           # == Eviction policy: not accessed in over 7 days
           # == Limit: 10 GB
@@ -41,3 +43,9 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Release package
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release

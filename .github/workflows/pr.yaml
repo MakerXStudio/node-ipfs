@@ -1,27 +1,32 @@
-name: Release
+name: Pull Request
+
 on:
+  # TODO: NC - Remove main branch trigger
   push:
     branches:
       - main
-
-permissions:
-  contents: write
+  pull_request:
+    branches: ['main']
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
 
-    name: Release package to NPM
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    name: Build and test with Node ${{ matrix.node-version }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Use Node.js latest LTS version
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: lts/*
+          node-version: ${{ matrix.node-version }}
           # == Cache frequently built and/or with large dependencies ==
           # == Eviction policy: not accessed in over 7 days
           # == Limit: 10 GB
@@ -40,9 +45,3 @@ jobs:
 
       - name: Run tests
         run: npm test
-
-      - name: Release package
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release
