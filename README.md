@@ -2,38 +2,75 @@
 
 > A NodeJS package that makes interacting with IPFS easier
 
-[![npm package][npm-img]][npm-url]
 [![Build Status][build-img]][build-url]
-[![Downloads][downloads-img]][downloads-url]
 [![Issues][issues-img]][issues-url]
 [![Semantic Release][semantic-release-img]][semantic-release-url]
 
 ## Install
 
-```bash
-npm install ipfs-storage
+Ensure you are authenticated to the [GitHub package repository with your PAT](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-with-a-personal-access-token) and add an `.npmrc` with the below contents:
+
 ```
+@makerxstudio:registry=https://npm.pkg.github.com
+```
+
+```bash
+npm install @makerxstudio/ipfs-storage
+```
+
+> [!NOTE]
+> This package is only compatible with Node 18 and above, as it uses the native node fetch.
 
 ## Usage
 
-- Depends on node18+
-- Upload files to Pinata
-  - Why aren't we using web3.storage?
+The primary purpose of this package is to make reading and writing files on the IPFS network easier. Unfortunately IPFS can be slow, so to mitigate this some cache implementations have also been supplied.
 
-** 🚨 TODO 🚨 **
+```typescript
+import { S3 } from '@aws-sdk/client-s3'
+import { PinataStorageWithCache, S3ObjectCache } from '@makerxstudio/ipfs-storage'
 
-_The usage section should be minimal. Enough to demo the package, but not overload the reader_
+const s3Cache = new S3ObjectCache(
+  new S3({
+    region: process.env.AWS_REGION,
+  }),
+  'CACHE_BUCKET_NAME',
+  'cache/ipfs/',
+)
+
+const ipfs = new PinataStorageWithCache('PINATA_STORAGE_API_JWT', s3Cache)
+
+// Put blob to IPFS
+const myImage = new Uint8Array([104, 101, 108, 108, 111])
+const { cid } = await ipfs.putBlob(myImage, 'image/png', 'my_file.png')
+
+// Put json to IPFS
+const { cid } = await ipfs.put({ hello: 'world' }, 'my_file.json')
+
+// Get blob by cid from cache with pass through to IPFS
+const myImage = await ipfs.getBlob('cid')
+
+// Get json by cid from cache with pass through to IPFS
+const json = await ipfs.get('cid')
+
+// Get cid of blob
+const myImage = new Uint8Array([104, 101, 108, 108, 111])
+const cid = await ipfs.getCID(myImage)
+
+// Get cid of json
+const cid = await ipfs.getCID({ hello: 'world' })
+```
+
+## Why Pinata?
+
+We use [Pinata](https://www.pinata.cloud/) to upload and pin files on the IPFS network. We previously used [web3.storage](https://web3.storage/), however they decided to [implement a more complex upload API and sunset their old API](https://blog.web3.storage/posts/the-data-layer-is-here-with-the-new-web3-storage), which makes integration a lot more complex.
+
+In order to use this library you'll need to [signup for a free account on Pinata](https://app.pinata.cloud/register) and generate a JWT to access the API.
+
+---
 
 [build-img]: https://github.com/MakerXStudio/ipfs-storage/actions/workflows/release.yml/badge.svg
 [build-url]: https://github.com/MakerXStudio/ipfs-storage/actions/workflows/release.yml
-[downloads-img]: https://img.shields.io/npm/dt/@MakerXStudio/ipfs-storage
-[downloads-url]: https://www.npmtrends.com/@makerx/ipfs-storage
-[npm-img]: https://img.shields.io/npm/v/@makerx/ipfs-storage
-[npm-url]: https://www.npmjs.com/package/@makerx/ipfs-storage
 [issues-img]: https://img.shields.io/github/issues/MakerXStudio/ipfs-storage
 [issues-url]: https://github.com/MakerXStudio/ipfs-storage/issues
 [semantic-release-img]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-release-url]: https://github.com/semantic-release/semantic-release
-
-TODO: NC - Finalise readme
-TODO: NC - Add tests

@@ -223,7 +223,7 @@ export class PinataStorageWithCache implements IPFS {
 
   async putBlob(blob: Uint8Array, contentType: string, name?: string): Promise<{ cid: string }> {
     const formData = new FormData()
-    formData.append('file', new File([blob], name ?? 'data', { type: contentType }))
+    formData.append('file', new Blob([blob], { type: contentType }), name ?? 'data')
     formData.append(
       'pinataOptions',
       JSON.stringify({
