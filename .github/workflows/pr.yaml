@@ -1,10 +1,6 @@
 name: Pull Request
 
 on:
-  # TODO: NC - Remove main branch trigger
-  push:
-    branches:
-      - main
   pull_request:
     branches: ['main']
 

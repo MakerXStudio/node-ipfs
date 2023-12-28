@@ -2,8 +2,7 @@ name: Release
 on:
   push:
     branches:
-      # - main
-      - ignore # TODO: NC - Remove this line and uncomment the line above when ready to release
+      - main
 
 permissions:
   contents: write
