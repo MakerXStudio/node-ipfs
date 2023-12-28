@@ -43,6 +43,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Check dist
+        run: ls -la dist
+
       - name: Release package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
