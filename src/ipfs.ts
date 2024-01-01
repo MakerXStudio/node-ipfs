@@ -145,7 +145,12 @@ export class CacheOnlyIPFS implements IPFS {
   }
 }
 
-export type PinataUploadResponse = { IpfsHash: string }
+type PinataUploadResponse = { IpfsHash: string }
+
+type PinataMetadata = {
+  name?: string
+  [key: string]: string | undefined
+}
 
 export class PinataStorageWithCache implements IPFS {
   private cache: ObjectCache
@@ -265,6 +270,29 @@ export class PinataStorageWithCache implements IPFS {
       const hash = await sha256.digest(bytes)
       const cid = CID.create(1, raw.code, hash)
       return cid.toString()
+    }
+  }
+
+  async updateMetadata(cid: string, metadata: PinataMetadata): Promise<void> {
+    const { name, ...keyvalues } = metadata
+    const response = await fetch(`${this.pinataBaseUrl}/hashMetadata`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${this.token}`,
+      },
+      body: JSON.stringify({
+        ipfsPinHash: cid,
+        ...(name ? { name } : undefined),
+        ...(keyvalues && Object.keys(keyvalues).length > 0 ? { keyvalues } : undefined),
+      }),
+    })
+
+    if (!response.ok) {
+      const statusCode = response.status
+      const errorResponse = await response.text()
+      throw new Error(`${statusCode} ${errorResponse}`)
     }
   }
 }
