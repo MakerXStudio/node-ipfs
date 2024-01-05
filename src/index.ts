@@ -1,2 +1,2 @@
 export * from './ipfs'
-export * from './cache'
+export * from '@makerxstudio/node-cache'

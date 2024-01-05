@@ -1,7 +1,7 @@
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import type { ObjectCache } from './cache'
+import type { ObjectCache } from '@makerxstudio/node-cache'
 import { fetchWithRetry } from './http'
 
 export interface IPFS {
@@ -86,8 +86,10 @@ export class CacheOnlyIPFS implements IPFS {
         const json = await response.json()
         return json as T
       },
-      undefined,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+      },
     )
   }
 
@@ -98,8 +100,10 @@ export class CacheOnlyIPFS implements IPFS {
       (_e) => {
         return Promise.resolve(data)
       },
-      0,
-      false,
+      {
+        staleAfterSeconds: 0,
+        returnStaleResultOnError: false,
+      },
     )
     return { cid: cid.toString() }
   }
@@ -114,9 +118,11 @@ export class CacheOnlyIPFS implements IPFS {
         const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
         return Buffer.from(await response.arrayBuffer())
       },
-      undefined,
-      true,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+        isBinary: true,
+      },
     )
   }
 
@@ -127,8 +133,10 @@ export class CacheOnlyIPFS implements IPFS {
       (_e) => {
         return Promise.resolve(blob)
       },
-      0,
-      false,
+      {
+        staleAfterSeconds: 0,
+        returnStaleResultOnError: false,
+      },
     )
     return { cid: cid.toString() }
   }
@@ -175,8 +183,10 @@ export class PinataStorageWithCache implements IPFS {
         const json = await response.json()
         return json as T
       },
-      undefined,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+      },
     )
   }
 
@@ -220,9 +230,11 @@ export class PinataStorageWithCache implements IPFS {
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         return Buffer.from(await response.arrayBuffer())
       },
-      undefined,
-      true,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+        isBinary: true,
+      },
     )
   }
 
