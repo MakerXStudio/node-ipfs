@@ -296,3 +296,24 @@ export class PinataStorageWithCache implements IPFS {
     }
   }
 }
+
+class NoOpCache implements ObjectCache {
+  getAndCache<T>(
+    _cacheKey: string,
+    generator: (existing: T | undefined) => Promise<T>,
+    _staleAfterSeconds?: number | undefined,
+    _returnStaleResult?: boolean | undefined,
+    _isBinary?: boolean | undefined,
+  ): Promise<T> {
+    return generator(undefined)
+  }
+  put<T>(_cacheKey: string, _data: T): Promise<void> {
+    return Promise.resolve()
+  }
+}
+
+export class PinataStorage extends PinataStorageWithCache {
+  constructor(pinataToken: string) {
+    super(pinataToken, new NoOpCache())
+  }
+}
