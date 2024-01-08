@@ -23,12 +23,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          # == Cache frequently built and/or with large dependencies ==
-          # == Eviction policy: not accessed in over 7 days
-          # == Limit: 10 GB
-          # cache: 'npm'
-          # == Path to lock file when using mono repos ==
-          # cache-dependency-path: subdir/package-lock.json
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@makerxstudio'
+          cache: 'npm'
+          cache-dependency-path: ./package-lock.json
 
       # run npm ci preventing script access to npm auth token
       - run: npm ci --ignore-scripts
