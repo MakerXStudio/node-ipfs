@@ -1,7 +1,7 @@
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import type { ObjectCache } from './cache'
+import type { BinaryCacheOptions, BinaryWithMetadata, CacheOptions, ObjectCache } from '@makerxstudio/node-cache'
 import { fetchWithRetry } from './http'
 
 export interface IPFS {
@@ -86,8 +86,10 @@ export class CacheOnlyIPFS implements IPFS {
         const json = await response.json()
         return json as T
       },
-      undefined,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+      },
     )
   }
 
@@ -98,8 +100,10 @@ export class CacheOnlyIPFS implements IPFS {
       (_e) => {
         return Promise.resolve(data)
       },
-      0,
-      false,
+      {
+        staleAfterSeconds: 0,
+        returnStaleResultOnError: false,
+      },
     )
     return { cid: cid.toString() }
   }
@@ -114,9 +118,11 @@ export class CacheOnlyIPFS implements IPFS {
         const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
         return Buffer.from(await response.arrayBuffer())
       },
-      undefined,
-      true,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+        isBinary: true,
+      },
     )
   }
 
@@ -127,8 +133,10 @@ export class CacheOnlyIPFS implements IPFS {
       (_e) => {
         return Promise.resolve(blob)
       },
-      0,
-      false,
+      {
+        staleAfterSeconds: 0,
+        returnStaleResultOnError: false,
+      },
     )
     return { cid: cid.toString() }
   }
@@ -175,8 +183,10 @@ export class PinataStorageWithCache implements IPFS {
         const json = await response.json()
         return json as T
       },
-      undefined,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+      },
     )
   }
 
@@ -220,9 +230,11 @@ export class PinataStorageWithCache implements IPFS {
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         return Buffer.from(await response.arrayBuffer())
       },
-      undefined,
-      true,
-      true,
+      {
+        staleAfterSeconds: undefined,
+        returnStaleResultOnError: true,
+        isBinary: true,
+      },
     )
   }
 
@@ -298,16 +310,24 @@ export class PinataStorageWithCache implements IPFS {
 }
 
 class NoOpCache implements ObjectCache {
-  getAndCache<T>(
-    _cacheKey: string,
-    generator: (existing: T | undefined) => Promise<T>,
-    _staleAfterSeconds?: number | undefined,
-    _returnStaleResult?: boolean | undefined,
-    _isBinary?: boolean | undefined,
-  ): Promise<T> {
+  getAndCache<T>(cacheKey: string, generator: (existing: T | undefined) => Promise<T>, _options?: CacheOptions | undefined): Promise<T> {
     return generator(undefined)
   }
-  put<T>(_cacheKey: string, _data: T): Promise<void> {
+  async getAndCacheBinary(
+    _cacheKey: string,
+    generator: (existing: Uint8Array | undefined) => Promise<Uint8Array>,
+    options?: BinaryCacheOptions | undefined,
+  ): Promise<BinaryWithMetadata> {
+    return {
+      data: await generator(undefined),
+      mimeType: options?.mimeType ?? 'application/octet-stream',
+      fileExtension: null,
+    }
+  }
+  put<T>(_cacheKey: string, _data: T, _mimeType?: string | undefined): Promise<void> {
+    return Promise.resolve()
+  }
+  putBinary(_cacheKey: string, _data: Uint8Array, _mimeType?: string | undefined): Promise<void> {
     return Promise.resolve()
   }
 }
