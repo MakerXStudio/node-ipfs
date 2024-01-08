@@ -26,7 +26,6 @@ jobs:
           node-version: lts/*
           registry-url: 'https://npm.pkg.github.com'
           scope: '@makerxstudio'
-          cache: 'npm'
 
       # run npm ci preventing script access to npm auth token
       - run: npm ci --ignore-scripts
@@ -48,4 +47,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
