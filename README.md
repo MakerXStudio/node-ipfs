@@ -1,4 +1,4 @@
-# IPFS Storage (ipfs-storage)
+# Node IPFS (node-ipfs)
 
 > A NodeJS package that makes interacting with IPFS easier
 
@@ -15,7 +15,7 @@ Ensure you are authenticated to the [GitHub package repository with your PAT](ht
 ```
 
 ```bash
-npm install @makerxstudio/ipfs-storage
+npm install @makerxstudio/node-ipfs
 ```
 
 > [!NOTE]
@@ -27,7 +27,7 @@ The primary purpose of this package is to make reading and writing files on the 
 
 ```typescript
 import { S3 } from '@aws-sdk/client-s3'
-import { PinataStorageWithCache, S3ObjectCache } from '@makerxstudio/ipfs-storage'
+import { PinataStorageWithCache, S3ObjectCache } from '@makerxstudio/node-ipfs'
 
 const s3Cache = new S3ObjectCache(
   new S3({
@@ -68,9 +68,9 @@ In order to use this library you'll need to [signup for a free account on Pinata
 
 ---
 
-[build-img]: https://github.com/MakerXStudio/ipfs-storage/actions/workflows/release.yaml/badge.svg
-[build-url]: https://github.com/MakerXStudio/ipfs-storage/actions/workflows/release.yaml
-[issues-img]: https://img.shields.io/github/issues/MakerXStudio/ipfs-storage
-[issues-url]: https://github.com/MakerXStudio/ipfs-storage/issues
+[build-img]: https://github.com/MakerXStudio/node-ipfs/actions/workflows/release.yaml/badge.svg
+[build-url]: https://github.com/MakerXStudio/node-ipfs/actions/workflows/release.yaml
+[issues-img]: https://img.shields.io/github/issues/MakerXStudio/node-ipfs
+[issues-url]: https://github.com/MakerXStudio/node-ipfs/issues
 [semantic-release-img]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-release-url]: https://github.com/semantic-release/semantic-release
