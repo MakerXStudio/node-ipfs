@@ -1,7 +1,7 @@
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import type { ObjectCache } from '@makerxstudio/node-cache'
+import type { BinaryCacheOptions, BinaryWithMetadata, CacheOptions, ObjectCache } from '@makerxstudio/node-cache'
 import { fetchWithRetry } from './http'
 
 export interface IPFS {
@@ -310,16 +310,24 @@ export class PinataStorageWithCache implements IPFS {
 }
 
 class NoOpCache implements ObjectCache {
-  getAndCache<T>(
-    _cacheKey: string,
-    generator: (existing: T | undefined) => Promise<T>,
-    _staleAfterSeconds?: number | undefined,
-    _returnStaleResult?: boolean | undefined,
-    _isBinary?: boolean | undefined,
-  ): Promise<T> {
+  getAndCache<T>(cacheKey: string, generator: (existing: T | undefined) => Promise<T>, _options?: CacheOptions | undefined): Promise<T> {
     return generator(undefined)
   }
-  put<T>(_cacheKey: string, _data: T): Promise<void> {
+  async getAndCacheBinary(
+    _cacheKey: string,
+    generator: (existing: Uint8Array | undefined) => Promise<Uint8Array>,
+    options?: BinaryCacheOptions | undefined,
+  ): Promise<BinaryWithMetadata> {
+    return {
+      data: await generator(undefined),
+      mimeType: options?.mimeType ?? 'application/octet-stream',
+      fileExtension: null,
+    }
+  }
+  put<T>(_cacheKey: string, _data: T, _mimeType?: string | undefined): Promise<void> {
+    return Promise.resolve()
+  }
+  putBinary(_cacheKey: string, _data: Uint8Array, _mimeType?: string | undefined): Promise<void> {
     return Promise.resolve()
   }
 }

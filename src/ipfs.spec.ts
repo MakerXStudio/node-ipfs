@@ -1,5 +1,5 @@
 import { PinataStorageWithCache } from './ipfs'
-import { ObjectCache } from './cache'
+import { ObjectCache } from '@makerxstudio/node-cache'
 import { mock, Mock } from 'ts-jest-mocker'
 
 const testToken = 'DUMMY_TOKEN'
