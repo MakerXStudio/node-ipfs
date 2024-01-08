@@ -24,15 +24,17 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          # == Cache frequently built and/or with large dependencies ==
-          # == Eviction policy: not accessed in over 7 days
-          # == Limit: 10 GB
-          # cache: 'npm'
-          # == Path to lock file when using mono repos ==
-          # cache-dependency-path: subdir/package-lock.json
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@makerxstudio'
+          cache: 'npm'
+          cache-dependency-path: ./package-lock.json
 
-      - name: Restore packages
-        run: npm ci
+      # run npm ci preventing script access to npm auth token
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+      # allow scripts to run without npm auth token
+      - run: npm rebuild
 
       - name: Lint commit messages
         run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
