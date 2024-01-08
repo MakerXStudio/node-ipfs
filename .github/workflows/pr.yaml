@@ -31,7 +31,7 @@ jobs:
       # run npm ci preventing script access to npm auth token
       - run: npm ci --ignore-scripts
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # allow scripts to run without npm auth token
       - run: npm rebuild
 
