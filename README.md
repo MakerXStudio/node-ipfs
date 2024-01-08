@@ -27,7 +27,8 @@ The primary purpose of this package is to make reading and writing files on the 
 
 ```typescript
 import { S3 } from '@aws-sdk/client-s3'
-import { PinataStorageWithCache, S3ObjectCache } from '@makerxstudio/node-ipfs'
+import { PinataStorageWithCache } from '@makerxstudio/node-ipfs'
+import { S3ObjectCache } from '@makerxstudio/node-cache'
 
 const s3Cache = new S3ObjectCache(
   new S3({
