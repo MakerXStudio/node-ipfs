@@ -9,7 +9,7 @@
 ## Install
 
 ```bash
-npm install @makerx/node-ipfs
+npm install @makerx/node-ipfs @makerx/node-cache
 ```
 
 > [!NOTE]
