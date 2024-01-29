@@ -1,7 +1,7 @@
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import type { BinaryCacheOptions, BinaryWithMetadata, CacheOptions, ObjectCache } from '@makerxstudio/node-cache'
+import type { BinaryCacheOptions, BinaryWithMetadata, CacheOptions, ObjectCache } from '@makerx/node-cache'
 import { fetchWithRetry } from './http'
 
 export interface IPFS {

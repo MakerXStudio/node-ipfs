@@ -8,14 +8,8 @@
 
 ## Install
 
-Ensure you are authenticated to the [GitHub package repository with your PAT](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-with-a-personal-access-token) and add an `.npmrc` with the below contents:
-
-```
-@makerxstudio:registry=https://npm.pkg.github.com
-```
-
 ```bash
-npm install @makerxstudio/node-ipfs
+npm install @makerx/node-ipfs
 ```
 
 > [!NOTE]
@@ -27,8 +21,8 @@ The primary purpose of this package is to make reading and writing files on the 
 
 ```typescript
 import { S3 } from '@aws-sdk/client-s3'
-import { PinataStorageWithCache } from '@makerxstudio/node-ipfs'
-import { S3ObjectCache } from '@makerxstudio/node-cache'
+import { PinataStorageWithCache } from '@makerx/node-ipfs'
+import { S3ObjectCache } from '@makerx/node-cache'
 
 const s3Cache = new S3ObjectCache(
   new S3({
