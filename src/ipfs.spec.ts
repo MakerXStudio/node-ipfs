@@ -104,7 +104,7 @@ describe('PinataStorageWithCache', () => {
 })
 
 describe('getCIDUrl', () => {
-  it('Correctly assembles the absolute URL', () => {
+  it('Correctly constructs the absolute URL for a CID', () => {
     const baseUrl = new URL('https://ipfs.pinata.cloud')
     const cid = 'my-cid'
 
@@ -113,7 +113,7 @@ describe('getCIDUrl', () => {
     expect(value).toBe('https://ipfs.pinata.cloud/ipfs/my-cid')
   })
 
-  it('Correctly strips out existing path from base URL if present', () => {
+  it('Correctly strips out existing path from the base URL if present', () => {
     const baseUrl = new URL('https://ipfs.pinata.cloud/this/should/be-removed')
     const cid = 'my-cid'
 

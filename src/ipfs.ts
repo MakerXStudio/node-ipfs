@@ -91,10 +91,7 @@ export class CacheOnlyIPFS implements IPFS {
         if (!this.ipfsOptions?.getFromIpfs) {
           throw new Error('404')
         }
-        const response = await fetchWithRetry(
-          getCIDUrl(this.ipfsOptions.gatewayOptions.baseUrl, cid),
-          this.ipfsOptions.gatewayOptions.requestOptions,
-        )
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsOptions.gatewayOptions.baseUrl, cid))
         const json = await response.json()
         return json as T
       },
@@ -127,10 +124,7 @@ export class CacheOnlyIPFS implements IPFS {
         if (!this.ipfsOptions?.getFromIpfs) {
           throw new Error('404')
         }
-        const response = await fetchWithRetry(
-          getCIDUrl(this.ipfsOptions.gatewayOptions.baseUrl, cid),
-          this.ipfsOptions.gatewayOptions.requestOptions,
-        )
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsOptions.gatewayOptions.baseUrl, cid))
         return Buffer.from(await response.arrayBuffer())
       },
       {
@@ -177,7 +171,10 @@ type PinataMetadata = {
 
 type IPFSGatewayOptions = {
   baseUrl: URL
-  requestOptions?: RequestInit
+}
+
+const defaultIPFSGatewayOptions: IPFSGatewayOptions = {
+  baseUrl: new URL('https://ipfs.algonode.dev'),
 }
 
 export class PinataStorageWithCache implements IPFS {
@@ -189,17 +186,17 @@ export class PinataStorageWithCache implements IPFS {
   // We've chosen to use the Pinata API directly rather than their JS SDK,
   // as it currently uses a really old version of axios, that has security vulnerabilities.
 
-  constructor(pinataToken: string, cache: ObjectCache, ipfsGatewayOptions: IPFSGatewayOptions) {
+  constructor(pinataToken: string, cache: ObjectCache, ipfsGatewayOptions?: IPFSGatewayOptions) {
     this.token = pinataToken
     this.cache = cache
-    this.ipfsGatewayOptions = ipfsGatewayOptions
+    this.ipfsGatewayOptions = ipfsGatewayOptions ?? defaultIPFSGatewayOptions
   }
 
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid), this.ipfsGatewayOptions.requestOptions)
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid))
         // eslint-disable-next-line no-console
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         const json = await response.json()
@@ -247,7 +244,7 @@ export class PinataStorageWithCache implements IPFS {
     return await this.cache.getAndCache<Uint8Array>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid), this.ipfsGatewayOptions.requestOptions)
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid))
         // eslint-disable-next-line no-console
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         return Buffer.from(await response.arrayBuffer())
@@ -356,7 +353,7 @@ class NoOpCache implements ObjectCache {
 }
 
 export class PinataStorage extends PinataStorageWithCache {
-  constructor(pinataToken: string, ipfsGatewayOptions: IPFSGatewayOptions) {
+  constructor(pinataToken: string, ipfsGatewayOptions?: IPFSGatewayOptions) {
     super(pinataToken, new NoOpCache(), ipfsGatewayOptions)
   }
 }
