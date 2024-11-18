@@ -330,6 +330,7 @@ class NoOpCache implements ObjectCache {
   putBinary(_cacheKey: string, _data: Uint8Array, _mimeType?: string | undefined): Promise<void> {
     return Promise.resolve()
   }
+  clearCache(_cacheKey: string): void {}
 }
 
 export class PinataStorage extends PinataStorageWithCache {

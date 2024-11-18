@@ -20,7 +20,7 @@ async function retryer(url: string, fetchOptions?: RequestInit, retries: number 
       retries: retries,
       onRetry: (e, num) => {
         // eslint-disable-next-line no-console
-        console.debug(`HTTP request failed. Retrying for #${num} time: ${e.message}`)
+        console.debug(`HTTP request failed. Retrying for #${num} time: ${(e as Error).message}`)
       },
     },
   )
