@@ -1,1 +1,1 @@
-export * from './ipfs'
+export { CacheOnlyIPFS, IPFS, InMemoryIPFS, PinataStorage, PinataStorageWithCache } from './ipfs'

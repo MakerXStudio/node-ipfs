@@ -1,4 +1,4 @@
-import { PinataStorageWithCache } from './ipfs'
+import { getCIDUrl, PinataStorageWithCache } from './ipfs'
 import { ObjectCache } from '@makerx/node-cache'
 import { mock, Mock } from 'ts-jest-mocker'
 
@@ -18,7 +18,9 @@ describe('PinataStorageWithCache', () => {
     cache = mock<ObjectCache>()
     cache.put.mockReturnValue(Promise.resolve())
 
-    ipfs = new PinataStorageWithCache(testToken, cache)
+    ipfs = new PinataStorageWithCache(testToken, cache, {
+      baseUrl: new URL('https://dummy-ipfs-gateway.com'),
+    })
     fetch.mockReset()
     fetch.mockResolvedValueOnce({
       ok: true,
@@ -98,5 +100,25 @@ describe('PinataStorageWithCache', () => {
 
       expect(cache.put.mock.calls).toEqual([[`ipfs-${testCid}`, testJson]])
     })
+  })
+})
+
+describe('getCIDUrl', () => {
+  it('Correctly assembles the absolute URL', () => {
+    const baseUrl = new URL('https://ipfs.pinata.cloud')
+    const cid = 'my-cid'
+
+    const value = getCIDUrl(baseUrl, cid)
+
+    expect(value).toBe('https://ipfs.pinata.cloud/ipfs/my-cid')
+  })
+
+  it('Correctly strips out existing path from base URL if present', () => {
+    const baseUrl = new URL('https://ipfs.pinata.cloud/this/should/be-removed')
+    const cid = 'my-cid'
+
+    const value = getCIDUrl(baseUrl, cid)
+
+    expect(value).toBe('https://ipfs.pinata.cloud/ipfs/my-cid')
   })
 })

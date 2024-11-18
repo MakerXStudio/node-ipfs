@@ -366,3 +366,10 @@ export class PinataStorage extends PinataStorageWithCache {
     super(pinataToken, new NoOpCache(), ipfsGatewayOptions)
   }
 }
+
+export function getCIDUrl(ipfsGatewayBaseUrl: URL, cid: string) {
+  const copy = new URL(ipfsGatewayBaseUrl.toString())
+  copy.pathname = `/ipfs/${cid}`
+
+  return copy.toString()
+}
