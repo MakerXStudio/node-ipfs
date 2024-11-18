@@ -50,7 +50,7 @@
     "async-retry": "^1.3.3",
     "blockstore-core": "^5.0.2",
     "ipfs-unixfs-importer": "^15.3.1",
-    "multiformats": "^13.3.1"
+    "multiformats": "^9.9.0"
   },
   "peerDependencies": {
     "@makerx/node-cache": "^1.1.0"
