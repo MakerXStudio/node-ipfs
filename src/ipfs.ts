@@ -161,11 +161,17 @@ type PinataMetadata = {
 }
 
 type IPFSGatewayOptions = {
-  baseUrl: URL
+  /**
+   * The base URL to use when fetching assets from the IPFS gateway.
+   *
+   * The expected format is such that the URL should be correct if another URL segment with the CID is appended.
+   * @example `https://ipfs.algonode.dev/ipfs`
+   */
+  baseUrl: string
 }
 
 const defaultIPFSGatewayOptions: IPFSGatewayOptions = {
-  baseUrl: new URL('https://ipfs.algonode.dev'),
+  baseUrl: 'https://ipfs.algonode.dev/ipfs',
 }
 
 export class PinataStorageWithCache implements IPFS {
@@ -349,9 +355,12 @@ export class PinataStorage extends PinataStorageWithCache {
   }
 }
 
-export function getCIDUrl(ipfsGatewayBaseUrl: URL, cid: string) {
-  const copy = new URL(ipfsGatewayBaseUrl.toString())
-  copy.pathname = `/ipfs/${cid}`
+export function getCIDUrl(ipfsGatewayBaseUrl: string, cid: string) {
+  // The trailing slash is important as it allows us to append the CID segment
+  // using URL instead of concatenating strings ourselves.
+  // Without the trailing slash, the whole path would be replaced.
+  const baseUrl = ipfsGatewayBaseUrl.endsWith('/') ? new URL(ipfsGatewayBaseUrl) : new URL(`${ipfsGatewayBaseUrl}/`)
+  const cidUrl = new URL(cid, baseUrl)
 
-  return copy.toString()
+  return cidUrl.toString()
 }
