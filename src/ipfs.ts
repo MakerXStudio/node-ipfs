@@ -92,7 +92,7 @@ export class CacheOnlyIPFS implements IPFS {
           throw new Error('404')
         }
         const response = await fetchWithRetry(
-          new URL(this.ipfsOptions.gatewayOptions.baseUrl.origin, `/ipfs/${cid}`).toString(),
+          getCIDUrl(this.ipfsOptions.gatewayOptions.baseUrl, cid),
           this.ipfsOptions.gatewayOptions.requestOptions,
         )
         const json = await response.json()
@@ -128,7 +128,7 @@ export class CacheOnlyIPFS implements IPFS {
           throw new Error('404')
         }
         const response = await fetchWithRetry(
-          new URL(this.ipfsOptions.gatewayOptions.baseUrl.origin, `/ipfs/${cid}`).toString(),
+          getCIDUrl(this.ipfsOptions.gatewayOptions.baseUrl, cid),
           this.ipfsOptions.gatewayOptions.requestOptions,
         )
         return Buffer.from(await response.arrayBuffer())
@@ -199,10 +199,7 @@ export class PinataStorageWithCache implements IPFS {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetchWithRetry(
-          new URL(this.ipfsGatewayOptions.baseUrl.origin, `/ipfs/${cid}`).toString(),
-          this.ipfsGatewayOptions.requestOptions,
-        )
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid), this.ipfsGatewayOptions.requestOptions)
         // eslint-disable-next-line no-console
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         const json = await response.json()
@@ -250,10 +247,7 @@ export class PinataStorageWithCache implements IPFS {
     return await this.cache.getAndCache<Uint8Array>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetchWithRetry(
-          new URL(this.ipfsGatewayOptions.baseUrl.origin, `/ipfs/${cid}`).toString(),
-          this.ipfsGatewayOptions.requestOptions,
-        )
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid), this.ipfsGatewayOptions.requestOptions)
         // eslint-disable-next-line no-console
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         return Buffer.from(await response.arrayBuffer())
