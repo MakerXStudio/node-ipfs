@@ -66,23 +66,36 @@ export class InMemoryIPFS implements IPFS {
   }
 }
 
+type CacheOnlyIPFSOptions =
+  | {
+      getFromIpfs: false
+    }
+  | {
+      getFromIpfs: true
+      ipfsGatewayBaseUrl: URL
+      ipfsGatewayRequestConfiguration?: RequestInit
+    }
+
 export class CacheOnlyIPFS implements IPFS {
   private cache: ObjectCache
-  private getFromIpfs: boolean
+  private ipfsOptions?: CacheOnlyIPFSOptions
 
-  constructor(cache: ObjectCache, getFromIpfs?: boolean) {
+  constructor(cache: ObjectCache, ipfsOptions?: CacheOnlyIPFSOptions) {
     this.cache = cache
-    this.getFromIpfs = getFromIpfs ?? false
+    this.ipfsOptions = ipfsOptions
   }
 
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        if (!this.getFromIpfs) {
+        if (!this.ipfsOptions?.getFromIpfs) {
           throw new Error('404')
         }
-        const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const response = await fetchWithRetry(
+          new URL(this.ipfsOptions.ipfsGatewayBaseUrl.origin, `/ipfs/${cid}`).toString(),
+          this.ipfsOptions.ipfsGatewayRequestConfiguration,
+        )
         const json = await response.json()
         return json as T
       },
@@ -112,10 +125,13 @@ export class CacheOnlyIPFS implements IPFS {
     return await this.cache.getAndCache<Uint8Array>(
       `ipfs-${cid}`,
       async (_e) => {
-        if (!this.getFromIpfs) {
+        if (!this.ipfsOptions?.getFromIpfs) {
           throw new Error('404')
         }
-        const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const response = await fetchWithRetry(
+          new URL(this.ipfsOptions.ipfsGatewayBaseUrl.origin, `/ipfs/${cid}`).toString(),
+          this.ipfsOptions.ipfsGatewayRequestConfiguration,
+        )
         return Buffer.from(await response.arrayBuffer())
       },
       {
