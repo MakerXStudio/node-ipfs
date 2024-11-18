@@ -16,6 +16,8 @@ describe('PinataStorageWithCache', () => {
 
   beforeEach(() => {
     cache = mock<ObjectCache>()
+    cache.put.mockReturnValue(Promise.resolve())
+
     ipfs = new PinataStorageWithCache(testToken, cache)
     fetch.mockReset()
     fetch.mockResolvedValueOnce({
