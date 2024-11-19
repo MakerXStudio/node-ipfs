@@ -1,4 +1,4 @@
-import { PinataStorageWithCache } from './ipfs'
+import { getCIDUrl, PinataStorageWithCache } from './ipfs'
 import { ObjectCache } from '@makerx/node-cache'
 import { mock, Mock } from 'ts-jest-mocker'
 
@@ -16,7 +16,11 @@ describe('PinataStorageWithCache', () => {
 
   beforeEach(() => {
     cache = mock<ObjectCache>()
-    ipfs = new PinataStorageWithCache(testToken, cache)
+    cache.put.mockReturnValue(Promise.resolve())
+
+    ipfs = new PinataStorageWithCache(testToken, cache, {
+      baseUrl: 'https://dummy-ipfs-gateway.com',
+    })
     fetch.mockReset()
     fetch.mockResolvedValueOnce({
       ok: true,
@@ -96,5 +100,34 @@ describe('PinataStorageWithCache', () => {
 
       expect(cache.put.mock.calls).toEqual([[`ipfs-${testCid}`, testJson]])
     })
+  })
+})
+
+describe('getCIDUrl', () => {
+  it('correctly constructs the absolute URL for a CID', () => {
+    const baseUrl = 'https://ipfs.pinata.cloud/ipfs/'
+    const cid = 'my-cid'
+
+    const value = getCIDUrl(baseUrl, cid)
+
+    expect(value).toBe('https://ipfs.pinata.cloud/ipfs/my-cid')
+  })
+
+  it(`correctly constructs the absolute URL for a CID if the base URL doesn't have a trailing slash`, () => {
+    const baseUrl = 'https://ipfs.pinata.cloud/ipfs'
+    const cid = 'my-cid'
+
+    const value = getCIDUrl(baseUrl, cid)
+
+    expect(value).toBe('https://ipfs.pinata.cloud/ipfs/my-cid')
+  })
+
+  it('correctly constructs the absolute URL for a CID if the base URL has no path', () => {
+    const baseUrl = 'https://ipfs.pinata.cloud'
+    const cid = 'my-cid'
+
+    const value = getCIDUrl(baseUrl, cid)
+
+    expect(value).toBe('https://ipfs.pinata.cloud/my-cid')
   })
 })

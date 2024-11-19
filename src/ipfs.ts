@@ -68,21 +68,21 @@ export class InMemoryIPFS implements IPFS {
 
 export class CacheOnlyIPFS implements IPFS {
   private cache: ObjectCache
-  private getFromIpfs: boolean
+  private ipfsGatewayOptions?: IPFSGatewayOptions
 
-  constructor(cache: ObjectCache, getFromIpfs?: boolean) {
+  constructor(cache: ObjectCache, ipfsGatewayOptions?: IPFSGatewayOptions) {
     this.cache = cache
-    this.getFromIpfs = getFromIpfs ?? false
+    this.ipfsGatewayOptions = ipfsGatewayOptions
   }
 
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        if (!this.getFromIpfs) {
+        if (!this.ipfsGatewayOptions) {
           throw new Error('404')
         }
-        const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid))
         const json = await response.json()
         return json as T
       },
@@ -112,10 +112,10 @@ export class CacheOnlyIPFS implements IPFS {
     return await this.cache.getAndCache<Uint8Array>(
       `ipfs-${cid}`,
       async (_e) => {
-        if (!this.getFromIpfs) {
+        if (!this.ipfsGatewayOptions) {
           throw new Error('404')
         }
-        const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid))
         return Buffer.from(await response.arrayBuffer())
       },
       {
@@ -160,24 +160,40 @@ type PinataMetadata = {
   [key: string]: string | undefined
 }
 
+type IPFSGatewayOptions = {
+  /**
+   * The base URL to use when fetching assets from the IPFS gateway.
+   *
+   * The expected format is such that the URL should be correct if another URL segment with the CID is appended.
+   * @example `https://ipfs.algonode.dev/ipfs`
+   */
+  baseUrl: string
+}
+
+const defaultIPFSGatewayOptions: IPFSGatewayOptions = {
+  baseUrl: 'https://ipfs.algonode.dev/ipfs',
+}
+
 export class PinataStorageWithCache implements IPFS {
   private cache: ObjectCache
   private token: string
+  private ipfsGatewayOptions: IPFSGatewayOptions
   private pinataBaseUrl = 'https://api.pinata.cloud/pinning'
 
   // We've chosen to use the Pinata API directly rather than their JS SDK,
   // as it currently uses a really old version of axios, that has security vulnerabilities.
 
-  constructor(pinataToken: string, cache: ObjectCache) {
+  constructor(pinataToken: string, cache: ObjectCache, ipfsGatewayOptions?: IPFSGatewayOptions) {
     this.token = pinataToken
     this.cache = cache
+    this.ipfsGatewayOptions = ipfsGatewayOptions ?? defaultIPFSGatewayOptions
   }
 
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid))
         // eslint-disable-next-line no-console
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         const json = await response.json()
@@ -225,7 +241,7 @@ export class PinataStorageWithCache implements IPFS {
     return await this.cache.getAndCache<Uint8Array>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetchWithRetry(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const response = await fetchWithRetry(getCIDUrl(this.ipfsGatewayOptions.baseUrl, cid))
         // eslint-disable-next-line no-console
         console.debug(`Cache miss for ${cid}, fetching from IPFS`)
         return Buffer.from(await response.arrayBuffer())
@@ -330,10 +346,21 @@ class NoOpCache implements ObjectCache {
   putBinary(_cacheKey: string, _data: Uint8Array, _mimeType?: string | undefined): Promise<void> {
     return Promise.resolve()
   }
+  clearCache(_cacheKey: string): void {}
 }
 
 export class PinataStorage extends PinataStorageWithCache {
-  constructor(pinataToken: string) {
-    super(pinataToken, new NoOpCache())
+  constructor(pinataToken: string, ipfsGatewayOptions?: IPFSGatewayOptions) {
+    super(pinataToken, new NoOpCache(), ipfsGatewayOptions)
   }
+}
+
+export function getCIDUrl(ipfsGatewayBaseUrl: string, cid: string) {
+  // The trailing slash is important as it allows us to append the CID segment
+  // using URL instead of concatenating strings ourselves.
+  // Without the trailing slash, the whole path would be replaced.
+  const baseUrl = ipfsGatewayBaseUrl.endsWith('/') ? new URL(ipfsGatewayBaseUrl) : new URL(`${ipfsGatewayBaseUrl}/`)
+  const cidUrl = new URL(cid, baseUrl)
+
+  return cidUrl.toString()
 }
